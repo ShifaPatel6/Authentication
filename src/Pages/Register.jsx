@@ -23,6 +23,17 @@ const Register = () => {
   // console.log(name, email, password, "logging details");
 
   const [isLoading, setIsLoading] = useState(false);
+  //Reusable function
+  const sendOtpToEmail = async (targetEmail) => {
+    const otpRes = await fetch("http://localhost:3000/otp-sent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: targetEmail }),
+    });
+
+    const otpData = await otpRes.json();
+    return { otpRes, otpData };
+  };
 
   const SignupUser = async () => {
     try {
@@ -46,34 +57,25 @@ const Register = () => {
       alert("Registered successfully");
       setOldEmail(email); // save for reference
 
-      //  Send OTP after signup
-      const otpRes = await fetch("http://localhost:3000/otp-sent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const otpData = await otpRes.json();
-      console.log(otpData, "otpdata");
+      //Use reusable OTP function
+      const { otpRes, otpData } = await sendOtpToEmail(email);
 
       if (!otpRes.ok || !otpData.status) {
-        alert("Failed to send OTP , please enter valid email address.");
-        setEmail("");
+        alert("Failed to send OTP, please enter valid email address.");
         setOtpFailed(true);
-
         setIsLoading(false);
         return;
       }
-      // Clear form
 
       alert("OTP sent to your email.");
 
-      setIsLoading(false);
       setEmail("");
       setMobile("");
       setName("");
       setPassword("");
-      // Navigate to EmailVerify page after OTP sent
+
+      setIsLoading(false);
+
       navigate("/EmailVerify", {
         state: { email },
       });
@@ -99,14 +101,17 @@ const Register = () => {
       alert(data.message || "Failed to update email");
       return;
     }
+    setOldEmail(email);
 
-    // Now resend OTP to new email
-    await fetch("http://localhost:3000/otp-sent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    alert("OTP sent");
+    const { otpRes, otpData } = await sendOtpToEmail(email);
+
+    if (!otpRes.ok || !otpData.status) {
+      alert("Failed to resend OTP to updated email");
+      return;
+    }
+
+    alert("Email updated and OTP resent successfully.");
+
     navigate("/EmailVerify", {
       state: { email },
     });
@@ -116,7 +121,6 @@ const Register = () => {
     <>
       <Box
         sx={{
-          backgroundColor: "gray",
           height: "100vh",
           display: "flex",
           justifyContent: "center",
@@ -222,7 +226,12 @@ const Register = () => {
             </Typography>
           </CardContent>
           <CardActions sx={{ display: "flex", justifyContent: "center" }}>
-            <Button variant="contained" size="medium" onClick={SignupUser}>
+            <Button
+              variant="contained"
+              size="medium"
+              onClick={SignupUser}
+              disabled={otpFailed}
+            >
               Register
             </Button>
           </CardActions>
@@ -235,7 +244,7 @@ const Register = () => {
             }}
           >
             Already have an account ?
-            <Link href="/" underline="hover">
+            <Link href="/Login" underline="hover">
               Login
             </Link>
           </Typography>

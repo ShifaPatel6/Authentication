@@ -60,7 +60,7 @@ router.put('/update-email', async (req, res) => {
               // Find the user by old (wrong) email
               const user = await User.findOne({ email: oldEmail });
               console.log("update reach");
-              
+
 
               if (!user) {
                      return res.status(404).json({ message: "Old email not found" });

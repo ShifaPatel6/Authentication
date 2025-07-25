@@ -7,9 +7,11 @@ import TextField from "@mui/material/TextField";
 import { useRef, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router";
+import LinearProgress from "@mui/material/LinearProgress";
 
 const Emailverify = () => {
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [isLoading, setIsLoading] = useState(false);
   const inputs = Array(4).fill(0);
   const inputRefs = useRef([]);
   const location = useLocation();
@@ -70,9 +72,11 @@ const Emailverify = () => {
 
       verifyOtp();
 
-      navigate("/", {
-        state: { email },
-      });
+      setIsLoading(true);
+      setTimeout(() => {
+        navigate("/Login", { state: { email } });
+      }, 5000);
+      setIsLoading(false);
     }
   }, [otp]);
 
@@ -93,7 +97,7 @@ const Emailverify = () => {
         <Card
           sx={{
             boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.25)",
-            height: "35vh",
+            height: "32vh",
             margin: "4rem",
             width: "50vw",
           }}
@@ -135,6 +139,11 @@ const Emailverify = () => {
                 />
               ))}
             </Box>
+            {isLoading ? (
+              <Box sx={{ width: "100%", marginTop: "11px" }}>
+                <LinearProgress />
+              </Box>
+            ) : null}
           </CardContent>
           <CardActions
             sx={{ display: "flex", justifyContent: "center" }}

@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import { Link, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -35,75 +36,100 @@ const Login = () => {
   };
   return (
     <>
-      <Box
-        sx={{
-          backgroundColor: "gray",
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-          //    minWidth: 275,
-          width: "100vw",
-        }}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4 }}
       >
-        <Card sx={{ boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.25)" }}>
-          <CardContent>
-            <Typography
-              gutterBottom
-              sx={{ color: "text.secondary", fontSize: 25 }}
-            >
-              Login
-            </Typography>
-            <Typography variant="h5" component="div">
-              <Box
-                component="form"
-                sx={{
-                  "& > :not(style)": { m: 1, width: "25ch" },
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-                noValidate
-                autoComplete="off"
+        <Box
+          sx={{
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            //    minWidth: 275,
+            width: "100vw",
+          }}
+        >
+          <Card sx={{ boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.25)" }}>
+            <CardContent>
+              <Typography
+                gutterBottom
+                sx={{ color: "text.secondary", fontSize: 25 }}
               >
-                <TextField
-                  // error
-                  // id="outlined-error"
-                  id="standard-basic"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  label="Email"
-                  variant="standard"
-                  // helperText="Incorrect entry."
-                />
-                <TextField
-                  id="standard-basic"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  label="Password"
-                  variant="standard"
-                />
-              </Box>
+                Login
+              </Typography>
+              <Typography variant="h5" component="div">
+                <Box
+                  component="form"
+                  sx={{
+                    "& > :not(style)": { m: 1, width: "25ch" },
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  noValidate
+                  autoComplete="off"
+                >
+                  <TextField
+                    // error
+                    // id="outlined-error"
+                    id="standard-basic"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    label="Email"
+                    variant="standard"
+                    // helperText="Incorrect entry."
+                  />
+                  <TextField
+                    id="standard-basic"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    label="Password"
+                    variant="standard"
+                  />
+                </Box>
+              </Typography>
+              <Typography
+                sx={{
+                  display: "flex",
+                  justifyContent: "right",
+                  fontSize: "12px",
+                }}
+              >
+                <Link href="#text-buttons" underline="hover">
+                  Forgot password ?
+                </Link>
+              </Typography>
+            </CardContent>
+            <CardActions sx={{ display: "flex", justifyContent: "center" }}>
+              <Button
+                variant="contained"
+                size="medium"
+                onClick={LoginUser}
+                disabled={!email || !password}
+              >
+                Login
+              </Button>
+            </CardActions>
+
+            <Typography
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "20px",
+                fontSize: "14px",
+              }}
+            >
+              Dont have an account ?
+              <Link href="/" underline="hover">
+                Register
+              </Link>{" "}
             </Typography>
-          </CardContent>
-          <CardActions sx={{ display: "flex", justifyContent: "center" }}>
-            <Button variant="contained" size="medium" onClick={LoginUser}>
-              Login
-            </Button>
-          </CardActions>
-          <Typography
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              padding: "15px",
-            }}
-          >
-            <Link href="#text-buttons" underline="hover">
-              Forgot password?
-            </Link>
-          </Typography>
-        </Card>
-      </Box>
+          </Card>
+        </Box>
+      </motion.div>
     </>
   );
 };
