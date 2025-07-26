@@ -1,44 +1,31 @@
-import * as React from "react";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import Button from "@mui/material/Button";
-import { Link, Typography } from "@mui/material";
-import TextField from "@mui/material/TextField";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Link,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mobile, setMobile] = useState("");
-  const [resend, setResend] = useState("");
-  const [otpFailed, setOtpFailed] = useState(false); // if OTP sending failed
-  const [oldEmail, setOldEmail] = useState(""); // store once on signup
+  const [otpFailed, setOtpFailed] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // console.log(name, email, password, "logging details");
-
-  const [isLoading, setIsLoading] = useState(false);
-  //Reusable function
-  const sendOtpToEmail = async (targetEmail) => {
-    const otpRes = await fetch("http://localhost:3000/otp-sent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: targetEmail }),
-    });
-
-    const otpData = await otpRes.json();
-    return { otpRes, otpData };
-  };
-
   const SignupUser = async () => {
     try {
-      setIsLoading(true); // Start loader
-      console.log("loaing");
+      setIsLoading(true);
 
       const res = await fetch("http://localhost:3000/signup", {
         method: "POST",
@@ -49,209 +36,143 @@ const Register = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Something went wrong");
-        setIsLoading(false); // Stop loader
+        if (data.errors) {
+          setErrors(data.errors); // field-wise errors
+        } else {
+          toast.error(data.message || "Something went wrong");
+        }
+        setIsLoading(false);
         return;
       }
 
-      alert("Registered successfully");
-      setOldEmail(email); // save for reference
+      setErrors({}); // clear old errors
 
-      //Use reusable OTP function
-      const { otpRes, otpData } = await sendOtpToEmail(email);
+      // Send OTP
+      const otpRes = await fetch("http://localhost:3000/otp-sent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const otpData = await otpRes.json();
 
       if (!otpRes.ok || !otpData.status) {
-        alert("Failed to send OTP, please enter valid email address.");
+        toast.error("Failed to send OTP, please enter a valid email address.");
         setOtpFailed(true);
         setIsLoading(false);
         return;
       }
 
-      alert("OTP sent to your email.");
-
-      setEmail("");
-      setMobile("");
+      toast.success("OTP sent to your email.");
       setName("");
+      setEmail("");
       setPassword("");
-
+      setMobile("");
       setIsLoading(false);
 
       navigate("/EmailVerify", {
         state: { email },
       });
     } catch (error) {
-      console.error("Error in Signup", error);
-      setIsLoading(false); // Stop loader on error
+      toast.error("Signup Error:", error);
+      setIsLoading(false);
     }
-  };
-  const handleUpdateEmail = async () => {
-    const res = await fetch("http://localhost:3000/update-email", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        oldEmail,
-        newEmail: email,
-      }),
-    });
-    console.log("updat email reached");
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Failed to update email");
-      return;
-    }
-    setOldEmail(email);
-
-    const { otpRes, otpData } = await sendOtpToEmail(email);
-
-    if (!otpRes.ok || !otpData.status) {
-      alert("Failed to resend OTP to updated email");
-      return;
-    }
-
-    alert("Email updated and OTP resent successfully.");
-
-    navigate("/EmailVerify", {
-      state: { email },
-    });
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-          //    minWidth: 275,
-          width: "100vw",
-        }}
-      >
-        {/* {isLoading ? (
-          <Box
-            className="spinner "
-            sx={{
-              background: "white",
-              borderRadius: "10px",
-              color: "black",
-              // padding: "2rem",
-              width: "100px",
-              textAlign: "center",
-            }}
-          >
-            <h5>Loading...</h5>
-          </Box>
-        ) : ( */}
-        <Card sx={{ boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.25)" }}>
-          <CardContent>
-            <Typography
-              gutterBottom
-              sx={{ color: "text.secondary", fontSize: 25 }}
-            >
-              Register
-            </Typography>
-            <Typography variant="h5" component="div">
-              <Box
-                component="form"
-                sx={{
-                  "& > :not(style)": { m: 1, width: "25ch" },
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-                noValidate
-                autoComplete="off"
-              >
-                <TextField
-                  // error
-                  // id="outlined-error"
-                  id="standard-basic"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  label="Username"
-                  variant="standard"
-                  // helperText="Incorrect entry."
-                />
-                <TextField
-                  // error
-                  // id="outlined-error"
-                  id="standard-basic"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  label="Email"
-                  variant="standard"
-                  // helperText="Incorrect entry."
-                />
-
-                {otpFailed ? (
-                  <div
-                    // onClick={handleResendOTP}
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      fontSize: "12px",
-                      cursor: email ? "pointer" : "not-allowed",
-                      color: email ? "#1976d2" : "gray",
-                      marginTop: "4px",
-                      width: "96%",
-                    }}
-                    aria-disabled={!email}
-                    role="button"
-                    onClick={handleUpdateEmail}
-                  >
-                    Resend OTP
-                  </div>
-                ) : null}
-
-                <TextField
-                  // error
-                  // id="outlined-error"
-                  id="standard-basic"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
-                  label="Mobile no"
-                  variant="standard"
-                  // helperText="Incorrect entry."
-                />
-                <TextField
-                  id="standard-basic"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  label="Password"
-                  variant="standard"
-                />
-              </Box>
-            </Typography>
-          </CardContent>
-          <CardActions sx={{ display: "flex", justifyContent: "center" }}>
-            <Button
-              variant="contained"
-              size="medium"
-              onClick={SignupUser}
-              disabled={otpFailed}
-            >
-              Register
-            </Button>
-          </CardActions>
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "center",
+        width: "100vw",
+      }}
+    >
+      <Card sx={{ boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.25)" }}>
+        <CardContent>
           <Typography
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "20px",
-              fontSize: "14px",
-            }}
+            gutterBottom
+            sx={{ color: "text.secondary", fontSize: 25 }}
           >
-            Already have an account ?
-            <Link href="/Login" underline="hover">
-              Login
-            </Link>
+            Register
           </Typography>
-        </Card>
-        {/* )} */}
-      </Box>
-    </>
+
+          <Box
+            component="form"
+            sx={{
+              "& > :not(style)": { m: 1, width: "35ch" },
+              display: "flex",
+              flexDirection: "column",
+            }}
+            noValidate
+            autoComplete="off"
+          >
+            <TextField
+              label="Username"
+              variant="standard"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              error={Boolean(errors.name)}
+              helperText={errors.name}
+            />
+
+            <TextField
+              label="Email"
+              variant="standard"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={Boolean(errors.email)}
+              helperText={errors.email}
+            />
+
+            <TextField
+              label="Mobile no"
+              variant="standard"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              error={Boolean(errors.mobile)}
+              helperText={errors.mobile}
+            />
+
+            <TextField
+              label="Password"
+              variant="standard"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={Boolean(errors.password)}
+              helperText={errors.password}
+            />
+          </Box>
+        </CardContent>
+
+        <CardActions sx={{ justifyContent: "center" }}>
+          <Button
+            variant="contained"
+            size="medium"
+            onClick={SignupUser}
+            disabled={!email || !password || !name || !mobile}
+          >
+            Register
+          </Button>
+        </CardActions>
+
+        <Typography
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "20px",
+            fontSize: "14px",
+          }}
+        >
+          Already have an account?{" "}
+          <Link href="/Login" underline="hover" sx={{ marginLeft: "4px" }}>
+            Login
+          </Link>
+        </Typography>
+      </Card>
+    </Box>
   );
 };
 

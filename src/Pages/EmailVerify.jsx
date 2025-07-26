@@ -80,6 +80,11 @@ const Emailverify = () => {
     }
   }, [otp]);
 
+   
+
+
+
+
   return (
     <>
       <Box
@@ -97,7 +102,7 @@ const Emailverify = () => {
         <Card
           sx={{
             boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.25)",
-            height: "32vh",
+            height: "45vh",
             margin: "4rem",
             width: "50vw",
           }}
@@ -144,6 +149,24 @@ const Emailverify = () => {
                 <LinearProgress />
               </Box>
             ) : null}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                marginTop: "10px",
+                display: "flex",
+                flexDirection: "rows",
+                justifyContent: "center",
+                gap: "10px",
+                alignItems: "center",
+              }}
+            >
+              If you didn't receive the OTP,{" "}
+              {/* <Link href="#" underline="hover"> */}
+              Resend OTP
+              {/* </Link> */}
+              <TextField id="outlined-basic" label="email" variant="outlined" />
+            </Typography>
           </CardContent>
           <CardActions
             sx={{ display: "flex", justifyContent: "center" }}

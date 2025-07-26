@@ -12,6 +12,29 @@ require('dotenv').config();
 
 router.post('/signup', async (req, res) => {
        const { name, email, password, mobile } = req.body;
+       const errors = {};
+
+       //Manual validations
+       if (!name || name.length < 3) {
+              errors.name = "Name must be at least 3 characters long";
+       }
+
+       if (!email || !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(email)) {
+              errors.email = "Invalid email format";
+       }
+
+       if (!password || password.length < 6) {
+              errors.password = "Password must be at least 6 characters";
+       }
+
+       if (!mobile || !/^\d{10}$/.test(mobile)) {
+              errors.mobile = "Mobile must be 10 digits";
+       }
+
+       // If there are any validation errors, return them
+       if (Object.keys(errors).length > 0) {
+              return res.status(400).json({ errors });
+       }
        try {
               // Check if user exists
               const existingUser = await User.findOne({ email });

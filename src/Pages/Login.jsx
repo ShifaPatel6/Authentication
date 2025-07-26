@@ -8,6 +8,7 @@ import { Link, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -26,10 +27,10 @@ const Login = () => {
       console.log("JWT Token:", data.token); // you now have the token
 
       if (!res.ok) {
-        alert(data.message || "Something went wrong");
+        toast.error(data.message || "Something went wrong");
         return;
       }
-      alert(data.message || "Login successfully!");
+      toast.success(data.message || "Login successfully!");
     } catch {
       console.log("Error in Signup");
     }
@@ -98,7 +99,7 @@ const Login = () => {
                   fontSize: "12px",
                 }}
               >
-                <Link href="#text-buttons" underline="hover">
+                <Link href="/ForgotPass" underline="hover">
                   Forgot password ?
                 </Link>
               </Typography>
